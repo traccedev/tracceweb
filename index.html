@@ -14,8 +14,10 @@
   <!-- Discourage indexing while you test. Remove if you WANT search traffic. -->
   <meta name="robots" content="noindex, nofollow" />
 
-  <!-- RSS auto-discovery — lets feed readers / Calibre find the feed. -->
-  <link rel="alternate" type="application/rss+xml" title="Tracce" href="/rss.xml" />
+  <!-- RSS auto-discovery — lets feed readers / Calibre find the feed.
+       Relative path (no leading slash) so it resolves correctly from the
+       /tracceweb/ subfolder this project site is served from. -->
+  <link rel="alternate" type="application/rss+xml" title="Tracce" href="rss.xml" />
 
   <!-- ============================================================
        FONTS — Newsreader (literary serif, for the writing itself)
@@ -205,14 +207,14 @@
         <!-- Dateline: post index + date, in mono. The index is real
              (posts are a chronological sequence), so numbering is honest. -->
         <div class="reveal reveal-1 font-mono text-xs tracking-[0.18em] uppercase text-muted dark:text-muted-d flex items-center gap-3">
-          <span>№ 012</span>
+          <span>№ 001</span>
           <span aria-hidden="true" class="h-px w-8 bg-rule dark:bg-rule-d eink-hide"></span>
-          <time datetime="2026-06-18">18 June 2026</time>
+          <time datetime="2026-06-24">24 June 2026</time>
         </div>
 
         <!-- Title. Large, light-weight serif for elegance. -->
         <h1 class="reveal reveal-2 mt-6 font-serif font-light leading-[1.08] tracking-tight text-[clamp(2.5rem,7vw,4.25rem)]">
-          On keeping a record<br />no one asked for
+          The art of<br />making choices
         </h1>
       </header>
 
@@ -224,31 +226,37 @@
         <span class="font-mono text-xs tracking-[0.2em] uppercase">optional hero image</span>
       </figure>
 
-      <!-- Body. Generous line-height + a narrow measure = effortless reading. -->
+      <!-- Body. Generous line-height + a narrow measure = effortless reading.
+           This is a starter draft in the blog's voice — replace with your own words. -->
       <div class="reveal reveal-3 mt-12 space-y-6 text-lg sm:text-xl leading-[1.75] font-light text-ink/90 dark:text-ink-d/90">
         <p>
-          There is a particular kind of writing that only works when it is unsigned.
-          Not because the words are dangerous, but because a name turns a thought into a
-          claim, and a claim into something to defend. Anonymous, the sentence is allowed
-          to be wrong tomorrow.
+          Every choice is two things at once: a small beginning, and a quiet funeral for
+          the lives you won't now live. We spend most of our effort on the beginning —
+          weighing, comparing, optimizing — and almost none on the part that actually
+          hurts, which is the letting go.
         </p>
         <p>
-          So this is a place for thinking out loud with the volume turned down. No metrics
-          on the wall, no followers to keep warm, no version of myself to maintain. Just
-          the latest idea, given the whole room, and the older ones filed quietly to the side.
+          More options were supposed to make us freer. Mostly they make us slower. A menu
+          of forty dishes is not forty times the pleasure of a menu of four; it's the same
+          dinner with more anxiety attached. To decide is, literally, to cut off — and the
+          relief on the far side of a real decision is the feeling of finally putting the
+          knife down.
         </p>
         <p>
-          If you found this, you found it the slow way — a link passed sideways, a margin
-          note in someone else's day. That feels like the right speed. Stay as long as the
-          thought is useful, and no longer.
+          So I've stopped trying to choose perfectly. Perfect assumes you could have known,
+          and you almost never could. What I aim for now is to choose in a way I can stand
+          behind later, even if it turns out wrong — to close the door gently, on purpose,
+          and walk. A life only takes a shape once some doors are allowed to stay shut.
         </p>
       </div>
     </article>
 
     <!-- ============================================================
          ARCHIVE — horizontally scrolling carousel of older posts.
-         Native scroll + CSS scroll-snap; arrow buttons are progressive
-         enhancement driven by the vanilla JS at the bottom of the file.
+         Right now this is the FIRST post, so the archive is empty.
+         When you publish post № 002, the current hero ("The art of
+         making choices") moves down here: uncomment ONE card in the
+         track below and ONE line in the e-ink list, then fill them in.
          ============================================================ -->
     <section aria-labelledby="archive-heading" class="border-t border-rule dark:border-rule-d py-20">
       <div class="mx-auto max-w-5xl px-6">
@@ -260,8 +268,8 @@
             <h2 id="archive-heading" class="mt-2 font-serif font-light text-2xl sm:text-3xl">Previous thoughts</h2>
           </div>
 
-          <!-- Carousel controls. Hidden from screen readers (the strip is
-               natively scrollable/swipeable); they're a convenience for mouse users. -->
+          <!-- Carousel arrows. Auto-disabled while the archive is empty;
+               they wake up on their own once there's more than one card. -->
           <div class="flex gap-2 shrink-0 eink-hide" aria-hidden="true">
             <button id="arch-prev" type="button" aria-label="Scroll archive left"
               class="grid place-items-center w-10 h-10 rounded-full border border-rule dark:border-rule-d hover:bg-ink/[0.04] dark:hover:bg-ink-d/[0.06] transition disabled:opacity-30 disabled:cursor-not-allowed">
@@ -275,109 +283,46 @@
         </div>
       </div>
 
-      <!-- The scroll track. max-w wrapper above; the track itself bleeds
-           to the right edge so cards hint at "more". scroll-px keeps snap
-           aligned to the page gutter. -->
+      <!-- The scroll track. Empty for now; shows a quiet empty-state line. -->
       <div id="archive-track"
         class="no-scrollbar flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-px-6 px-6 mx-auto max-w-5xl pb-2">
 
-        <!-- ARCHIVE CARD (template). Duplicate & edit for each old post. -->
+        <!-- EMPTY STATE — delete this line once you add your first card. -->
+        <p class="font-serif font-light text-muted dark:text-muted-d italic py-6">
+          Nothing archived yet — when the next thought arrives, this one will move here.
+        </p>
+
+        <!-- ARCHIVE CARD TEMPLATE — copy this block (remove the comment
+             wrapper) for each older post, newest first.
         <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
           <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
-            <span>№ 011</span><time datetime="2026-05-30">30 May 2026</time>
+            <span>№ 001</span><time datetime="2026-06-24">24 June 2026</time>
           </div>
-          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">The usefulness of a slow inbox</h3>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">The art of making choices</h3>
           <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
-            I started answering messages once a day, on purpose. The first week felt like
-            negligence. The second week it felt like a boundary. By the third, most of the
-            "urgent" had quietly resolved itself without me.
+            Every choice is a small beginning and a quiet funeral for the lives you won't
+            now live. The hard part was never the choosing — it's the letting go.
           </p>
           <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
         </article>
+        -->
 
-        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
-          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
-            <span>№ 010</span><time datetime="2026-05-12">12 May 2026</time>
-          </div>
-          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">Notes against the highlight reel</h3>
-          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
-            Every feed is a museum of someone's best fifteen seconds. The trouble isn't the
-            envy — it's forgetting that the boring middle of your own day is where the actual
-            living happens.
-          </p>
-          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
-        </article>
-
-        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
-          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
-            <span>№ 009</span><time datetime="2026-04-21">21 April 2026</time>
-          </div>
-          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">On finishing instead of starting</h3>
-          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
-            A new project is a clean fantasy; a half-finished one is a mirror. I'm trying to
-            spend a season closing tabs rather than opening them, and reporting back on what
-            that costs.
-          </p>
-          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
-        </article>
-
-        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
-          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
-            <span>№ 008</span><time datetime="2026-04-03">3 April 2026</time>
-          </div>
-          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">The quiet luxury of being unreachable</h3>
-          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
-            Nobody is owed a real-time version of you. I keep relearning this, usually around
-            the moment I notice I've been refreshing something I already read.
-          </p>
-          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
-        </article>
-
-        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
-          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
-            <span>№ 007</span><time datetime="2026-03-15">15 March 2026</time>
-          </div>
-          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">A small defense of the long walk</h3>
-          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
-            Most of my better sentences arrive on foot, unannounced, somewhere around the
-            third kilometer. The desk is where I type them up — never where I find them.
-          </p>
-          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
-        </article>
-
-        <!-- /ARCHIVE CARDS -->
       </div>
 
       <!-- ========================================================
            E-INK / PRINT ARCHIVE LIST
-           Plain, JS-free, single-column. Hidden on normal screens
-           (display:none) and revealed only under @media print /
-           (monochrome). Keep these entries in sync with the cards
-           above — they're the e-reader-friendly mirror of the same
-           posts. Living in static HTML means it works even when an
-           e-reader's browser runs no JavaScript.
+           Plain, JS-free, single-column. Hidden on normal screens and
+           revealed only under @media print / (monochrome). Keep it in
+           sync with the cards above — it's the e-reader-friendly mirror.
            ======================================================== -->
       <ol class="eink-list mx-auto max-w-reading px-6 mt-4 list-none">
+        <li>Nothing archived yet.</li>
+        <!-- ARCHIVE LIST TEMPLATE — copy one <li> per older post:
         <li>
-          <a href="#"><strong>The usefulness of a slow inbox</strong></a>
-          <span> — 30 May 2026 (№ 011)</span>
+          <a href="#"><strong>The art of making choices</strong></a>
+          <span> — 24 June 2026 (№ 001)</span>
         </li>
-        <li>
-          <a href="#"><strong>Notes against the highlight reel</strong></a>
-          <span> — 12 May 2026 (№ 010)</span>
-        </li>
-        <li>
-          <a href="#"><strong>On finishing instead of starting</strong></a>
-          <span> — 21 April 2026 (№ 009)</span>
-        </li>
-        <li>
-          <a href="#"><strong>The quiet luxury of being unreachable</strong></a>
-          <span> — 3 April 2026 (№ 008)</span>
-        </li>
-        <li>
-          <a href="#"><strong>A small defense of the long walk</strong></a>
-          <span> — 15 March 2026 (№ 007)</span>
-        </li>
+        -->
       </ol>
     </section>
   </main>
@@ -420,34 +365,37 @@
     });
 
     // --- Archive carousel ---
+    // Guarded so an empty archive (e.g. the very first post) never errors.
     var track = document.getElementById('archive-track');
     var prev = document.getElementById('arch-prev');
     var next = document.getElementById('arch-next');
 
-    // Scroll by one card width (+ the flex gap) per click.
-    function step() {
-      var card = track.querySelector('article');
-      if (!card) return track.clientWidth;
-      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 0);
-      return card.offsetWidth + (isNaN(gap) ? 0 : gap);
-    }
+    if (track && prev && next) {
+      // Scroll by one card width (+ the flex gap) per click.
+      var step = function () {
+        var card = track.querySelector('article');
+        if (!card) return track.clientWidth;
+        var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 0);
+        return card.offsetWidth + (isNaN(gap) ? 0 : gap);
+      };
 
-    prev.addEventListener('click', function () {
-      track.scrollBy({ left: -step(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', function () {
-      track.scrollBy({ left: step(), behavior: 'smooth' });
-    });
+      prev.addEventListener('click', function () {
+        track.scrollBy({ left: -step(), behavior: 'smooth' });
+      });
+      next.addEventListener('click', function () {
+        track.scrollBy({ left: step(), behavior: 'smooth' });
+      });
 
-    // Disable an arrow when you reach that end of the strip.
-    function updateArrows() {
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      prev.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft >= maxScroll - 2;
+      // Disable an arrow when you reach that end of the strip.
+      var updateArrows = function () {
+        var maxScroll = track.scrollWidth - track.clientWidth;
+        prev.disabled = track.scrollLeft <= 2;
+        next.disabled = track.scrollLeft >= maxScroll - 2;
+      };
+      track.addEventListener('scroll', updateArrows, { passive: true });
+      window.addEventListener('resize', updateArrows);
+      updateArrows();
     }
-    track.addEventListener('scroll', updateArrows, { passive: true });
-    window.addEventListener('resize', updateArrows);
-    updateArrows();
   </script>
 </body>
 </html>
