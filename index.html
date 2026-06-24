@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+       META
+       Keep this generic. Do not put a real name, real location,
+       or anything personally identifying in the title/description.
+       ============================================================ -->
+  <title>Tracce — a quiet place</title>
+  <meta name="description" content="A small journal of thoughts." />
+  <!-- Discourage indexing while you test. Remove if you WANT search traffic. -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- RSS auto-discovery — lets feed readers / Calibre find the feed. -->
+  <link rel="alternate" type="application/rss+xml" title="Marginalia" href="/rss.xml" />
+
+  <!-- ============================================================
+       FONTS — Newsreader (literary serif, for the writing itself)
+       paired with JetBrains Mono (utility face for dates / labels).
+       This pairing is the page's signature: words vs. metadata.
+       ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- ============================================================
+       TAILWIND (Play CDN — for immediate local testing only).
+       Before production, compile Tailwind so you ship one small CSS
+       file instead of the runtime compiler. See deploy notes (Part 3).
+       ============================================================ -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config: class-based dark mode + a disciplined
+    // monochromatic palette (warm-neutral, never pure #000/#fff).
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            // Light
+            paper: '#FBFBFA',
+            ink:   '#161614',
+            muted: '#6F6F6A',
+            rule:  '#E6E6E1',
+            // Dark
+            'paper-d': '#0E0E0D',
+            'ink-d':   '#EDEDE9',
+            'muted-d': '#8C8C86',
+            'rule-d':  '#242421',
+          },
+          maxWidth: { reading: '40rem' }, // ~66 characters: a comfortable measure
+        },
+      },
+    };
+  </script>
+
+  <!-- ============================================================
+       PRE-PAINT THEME — set the theme class before first paint so
+       there is no flash of the wrong mode. Storage is wrapped so it
+       degrades gracefully in sandboxes that block localStorage.
+       ============================================================ -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) { /* storage unavailable — fall back to light */ }
+    })();
+  </script>
+
+  <style>
+    /* Hide the native scrollbar on the archive strip while keeping it scrollable. */
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* Clamp archive snippets to a tidy number of lines. */
+    .clamp-4 {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Quiet entrance for the hero. Disabled below for reduced-motion. */
+    .reveal { opacity: 0; transform: translateY(8px); animation: reveal 0.7s ease forwards; }
+    .reveal-1 { animation-delay: 0.05s; }
+    .reveal-2 { animation-delay: 0.15s; }
+    .reveal-3 { animation-delay: 0.25s; }
+    @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { animation: none; opacity: 1; transform: none; }
+      * { transition: none !important; }
+    }
+
+    /* Visible keyboard focus everywhere. */
+    :focus-visible { outline: 1.5px solid currentColor; outline-offset: 3px; }
+
+    /* ============================================================
+       E-INK / KINDLE / PRINT
+       Triggers when the page is printed, "Sent to Kindle", or viewed
+       on a device that reports a monochrome (e-ink) frame buffer.
+       Goal: pure black on pure white, no grays/borders/shadows, and
+       the JS carousel swapped for a plain, JS-free vertical list.
+       (The vertical list lives in static HTML — see .eink-list below —
+       so it survives even when JavaScript never runs on the e-reader.)
+       ============================================================ */
+    .eink-list { display: none; } /* hidden on normal screens */
+
+    @media print, (monochrome) {
+      /* Maximum contrast, theme-agnostic. */
+      html, body { background: #fff !important; color: #000 !important; }
+      * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        border-width: 0 !important;      /* drop every subtle gray hairline */
+        border-radius: 0 !important;
+        opacity: 1 !important;           /* cancel the reveal animation */
+        transform: none !important;
+      }
+
+      /* Remove interactive / decorative chrome that means nothing on e-ink. */
+      #theme-toggle,
+      #arch-prev,
+      #arch-next,
+      #archive-track,
+      .eink-hide { display: none !important; }
+
+      /* Un-stick the header so the article starts at the top of the page. */
+      header { position: static !important; }
+
+      /* Reveal the static, JS-free archive list. */
+      .eink-list { display: block !important; }
+      .eink-list li { border-bottom: 1px solid #000 !important; padding: 0.6rem 0; }
+      .eink-list li:last-child { border-bottom: 0 !important; }
+
+      /* Reading-tuned type and honest underlined links for print. */
+      body { font-size: 12pt; line-height: 1.65; }
+      a { text-decoration: underline; }
+    }
+  </style>
+</head>
+
+<body class="bg-paper dark:bg-paper-d text-ink dark:text-ink-d font-serif antialiased transition-colors duration-300">
+
+  <!-- ============================================================
+       HEADER — logo/name + theme toggle. Nothing else.
+       ============================================================ -->
+  <header class="sticky top-0 z-20 bg-paper/85 dark:bg-paper-d/85 backdrop-blur-sm border-b border-rule dark:border-rule-d">
+    <div class="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
+      <!-- Wordmark. Mono + tracking gives an understated, indie feel. -->
+      <a href="#top" class="font-mono text-sm tracking-[0.2em] uppercase hover:opacity-60 transition-opacity">
+        Marginalia
+      </a>
+
+      <!-- Dark / light toggle. Icon-only, so it carries an aria-label. -->
+      <button
+        id="theme-toggle"
+        type="button"
+        aria-label="Toggle dark mode"
+        class="grid place-items-center w-9 h-9 rounded-full border border-rule dark:border-rule-d hover:bg-ink/[0.04] dark:hover:bg-ink-d/[0.06] transition-colors"
+      >
+        <!-- Sun (shown in dark mode → click to go light) -->
+        <svg class="hidden dark:block w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
+        </svg>
+        <!-- Moon (shown in light mode → click to go dark) -->
+        <svg class="block dark:hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============================================================
+         HERO — the LATEST post. Fills the majority of the viewport.
+         Replace the eyebrow number, title, date, image and body
+         when you publish a new thought.
+         ============================================================ -->
+    <article id="latest-post" class="mx-auto max-w-reading px-6 min-h-[88vh] flex flex-col justify-center py-20">
+
+      <!-- Inner <header> groups the title + dateline. Readability-style
+           parsers (Send to Kindle, Pocket, RSS readers) use this to lock
+           onto the post's title and metadata. -->
+      <header>
+        <!-- Dateline: post index + date, in mono. The index is real
+             (posts are a chronological sequence), so numbering is honest. -->
+        <div class="reveal reveal-1 font-mono text-xs tracking-[0.18em] uppercase text-muted dark:text-muted-d flex items-center gap-3">
+          <span>№ 012</span>
+          <span aria-hidden="true" class="h-px w-8 bg-rule dark:bg-rule-d eink-hide"></span>
+          <time datetime="2026-06-18">18 June 2026</time>
+        </div>
+
+        <!-- Title. Large, light-weight serif for elegance. -->
+        <h1 class="reveal reveal-2 mt-6 font-serif font-light leading-[1.08] tracking-tight text-[clamp(2.5rem,7vw,4.25rem)]">
+          On keeping a record<br />no one asked for
+        </h1>
+      </header>
+
+      <!-- OPTIONAL hero image. Swap this placeholder for:
+           <img src="your-image.jpg" alt="" class="w-full rounded-sm" />
+           ⚠ Strip EXIF metadata from any photo first (Part 3).
+           The empty placeholder is tagged eink-hide so it disappears on e-readers. -->
+      <figure class="reveal reveal-3 mt-12 aspect-[16/9] w-full border border-rule dark:border-rule-d rounded-sm grid place-items-center text-muted dark:text-muted-d eink-hide">
+        <span class="font-mono text-xs tracking-[0.2em] uppercase">optional hero image</span>
+      </figure>
+
+      <!-- Body. Generous line-height + a narrow measure = effortless reading. -->
+      <div class="reveal reveal-3 mt-12 space-y-6 text-lg sm:text-xl leading-[1.75] font-light text-ink/90 dark:text-ink-d/90">
+        <p>
+          There is a particular kind of writing that only works when it is unsigned.
+          Not because the words are dangerous, but because a name turns a thought into a
+          claim, and a claim into something to defend. Anonymous, the sentence is allowed
+          to be wrong tomorrow.
+        </p>
+        <p>
+          So this is a place for thinking out loud with the volume turned down. No metrics
+          on the wall, no followers to keep warm, no version of myself to maintain. Just
+          the latest idea, given the whole room, and the older ones filed quietly to the side.
+        </p>
+        <p>
+          If you found this, you found it the slow way — a link passed sideways, a margin
+          note in someone else's day. That feels like the right speed. Stay as long as the
+          thought is useful, and no longer.
+        </p>
+      </div>
+    </article>
+
+    <!-- ============================================================
+         ARCHIVE — horizontally scrolling carousel of older posts.
+         Native scroll + CSS scroll-snap; arrow buttons are progressive
+         enhancement driven by the vanilla JS at the bottom of the file.
+         ============================================================ -->
+    <section aria-labelledby="archive-heading" class="border-t border-rule dark:border-rule-d py-20">
+      <div class="mx-auto max-w-5xl px-6">
+
+        <!-- Section header + arrow controls -->
+        <div class="flex items-end justify-between gap-6 mb-8">
+          <div>
+            <p class="font-mono text-xs tracking-[0.2em] uppercase text-muted dark:text-muted-d">Archive</p>
+            <h2 id="archive-heading" class="mt-2 font-serif font-light text-2xl sm:text-3xl">Previous thoughts</h2>
+          </div>
+
+          <!-- Carousel controls. Hidden from screen readers (the strip is
+               natively scrollable/swipeable); they're a convenience for mouse users. -->
+          <div class="flex gap-2 shrink-0 eink-hide" aria-hidden="true">
+            <button id="arch-prev" type="button" aria-label="Scroll archive left"
+              class="grid place-items-center w-10 h-10 rounded-full border border-rule dark:border-rule-d hover:bg-ink/[0.04] dark:hover:bg-ink-d/[0.06] transition disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button id="arch-next" type="button" aria-label="Scroll archive right"
+              class="grid place-items-center w-10 h-10 rounded-full border border-rule dark:border-rule-d hover:bg-ink/[0.04] dark:hover:bg-ink-d/[0.06] transition disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- The scroll track. max-w wrapper above; the track itself bleeds
+           to the right edge so cards hint at "more". scroll-px keeps snap
+           aligned to the page gutter. -->
+      <div id="archive-track"
+        class="no-scrollbar flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-px-6 px-6 mx-auto max-w-5xl pb-2">
+
+        <!-- ARCHIVE CARD (template). Duplicate & edit for each old post. -->
+        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
+            <span>№ 011</span><time datetime="2026-05-30">30 May 2026</time>
+          </div>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">The usefulness of a slow inbox</h3>
+          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
+            I started answering messages once a day, on purpose. The first week felt like
+            negligence. The second week it felt like a boundary. By the third, most of the
+            "urgent" had quietly resolved itself without me.
+          </p>
+          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
+        </article>
+
+        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
+            <span>№ 010</span><time datetime="2026-05-12">12 May 2026</time>
+          </div>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">Notes against the highlight reel</h3>
+          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
+            Every feed is a museum of someone's best fifteen seconds. The trouble isn't the
+            envy — it's forgetting that the boring middle of your own day is where the actual
+            living happens.
+          </p>
+          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
+        </article>
+
+        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
+            <span>№ 009</span><time datetime="2026-04-21">21 April 2026</time>
+          </div>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">On finishing instead of starting</h3>
+          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
+            A new project is a clean fantasy; a half-finished one is a mirror. I'm trying to
+            spend a season closing tabs rather than opening them, and reporting back on what
+            that costs.
+          </p>
+          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
+        </article>
+
+        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
+            <span>№ 008</span><time datetime="2026-04-03">3 April 2026</time>
+          </div>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">The quiet luxury of being unreachable</h3>
+          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
+            Nobody is owed a real-time version of you. I keep relearning this, usually around
+            the moment I notice I've been refreshing something I already read.
+          </p>
+          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
+        </article>
+
+        <article class="snap-start shrink-0 w-[80vw] sm:w-80 border border-rule dark:border-rule-d rounded-sm p-6 flex flex-col hover:-translate-y-1 transition-transform duration-300">
+          <div class="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted dark:text-muted-d flex justify-between">
+            <span>№ 007</span><time datetime="2026-03-15">15 March 2026</time>
+          </div>
+          <h3 class="mt-4 font-serif font-normal text-xl leading-snug">A small defense of the long walk</h3>
+          <p class="mt-3 text-muted dark:text-muted-d leading-relaxed clamp-4">
+            Most of my better sentences arrive on foot, unannounced, somewhere around the
+            third kilometer. The desk is where I type them up — never where I find them.
+          </p>
+          <a href="#" class="mt-5 font-mono text-xs tracking-[0.15em] uppercase hover:opacity-60 transition">Read →</a>
+        </article>
+
+        <!-- /ARCHIVE CARDS -->
+      </div>
+
+      <!-- ========================================================
+           E-INK / PRINT ARCHIVE LIST
+           Plain, JS-free, single-column. Hidden on normal screens
+           (display:none) and revealed only under @media print /
+           (monochrome). Keep these entries in sync with the cards
+           above — they're the e-reader-friendly mirror of the same
+           posts. Living in static HTML means it works even when an
+           e-reader's browser runs no JavaScript.
+           ======================================================== -->
+      <ol class="eink-list mx-auto max-w-reading px-6 mt-4 list-none">
+        <li>
+          <a href="#"><strong>The usefulness of a slow inbox</strong></a>
+          <span> — 30 May 2026 (№ 011)</span>
+        </li>
+        <li>
+          <a href="#"><strong>Notes against the highlight reel</strong></a>
+          <span> — 12 May 2026 (№ 010)</span>
+        </li>
+        <li>
+          <a href="#"><strong>On finishing instead of starting</strong></a>
+          <span> — 21 April 2026 (№ 009)</span>
+        </li>
+        <li>
+          <a href="#"><strong>The quiet luxury of being unreachable</strong></a>
+          <span> — 3 April 2026 (№ 008)</span>
+        </li>
+        <li>
+          <a href="#"><strong>A small defense of the long walk</strong></a>
+          <span> — 15 March 2026 (№ 007)</span>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER — copyright + a single Instagram link. Keep it bare.
+       Do not add an email, name, or location here.
+       ============================================================ -->
+  <footer class="border-t border-rule dark:border-rule-d">
+    <div class="mx-auto max-w-5xl px-6 h-20 flex items-center justify-between">
+      <p class="font-mono text-xs tracking-[0.15em] uppercase text-muted dark:text-muted-d">
+        © 2026 Tracce
+      </p>
+      <a href="https://instagram.com/your_handle" target="_blank" rel="noopener noreferrer"
+        aria-label="Instagram" class="text-muted dark:text-muted-d hover:text-ink dark:hover:text-ink-d transition-colors eink-hide">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      </a>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS — theme toggle + archive carousel. Vanilla JS only.
+       ============================================================ -->
+  <script>
+    // --- Safe storage helper (no crash where localStorage is blocked) ---
+    var store = {
+      get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    };
+
+    // --- Dark / light toggle ---
+    var toggle = document.getElementById('theme-toggle');
+    toggle.addEventListener('click', function () {
+      var isDark = document.documentElement.classList.toggle('dark');
+      store.set('theme', isDark ? 'dark' : 'light');
+    });
+
+    // --- Archive carousel ---
+    var track = document.getElementById('archive-track');
+    var prev = document.getElementById('arch-prev');
+    var next = document.getElementById('arch-next');
+
+    // Scroll by one card width (+ the flex gap) per click.
+    function step() {
+      var card = track.querySelector('article');
+      if (!card) return track.clientWidth;
+      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 0);
+      return card.offsetWidth + (isNaN(gap) ? 0 : gap);
+    }
+
+    prev.addEventListener('click', function () {
+      track.scrollBy({ left: -step(), behavior: 'smooth' });
+    });
+    next.addEventListener('click', function () {
+      track.scrollBy({ left: step(), behavior: 'smooth' });
+    });
+
+    // Disable an arrow when you reach that end of the strip.
+    function updateArrows() {
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= maxScroll - 2;
+    }
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+  </script>
+</body>
+</html>
